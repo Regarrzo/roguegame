@@ -66,6 +66,11 @@ def main():
 
 
 
+main() #cmmit this line to run the game with menu
         
-    
-main()
+# uncommit this line to run the game with menu    
+# def run_game():
+#     main()  
+
+# if __name__ == "__main__":
+#     run_game()  
