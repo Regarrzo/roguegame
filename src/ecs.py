@@ -26,6 +26,9 @@ class Entity:
 
     def __delitem__(self, component_type: Type):
         del self.components[component_type]
+    
+    def __hash__(self):
+        return hash(self.identifier)
 
 class Event(ABC):
     '''
@@ -46,9 +49,11 @@ class ECS:
     It stores entities and components and calls systems via events. 
     '''
     def __init__(self):
-        self.entities: Dict[Hashable, Entity] = {}
-        self.systems: Dict[Hashable, List[System]] = {}
+        self.entities: Set[Entity] = set()
+        self.systems: Dict[Entity, List[System]] = {}
         self._id_counter = 0
+        self._position_to_entity: Dict[Tuple[int, int], Set[Entity]] = {}
+        self._entity_to_position: Dict[Entity, Tuple[int, int]]= {}
 
     def _next_id(self) -> int:
         # If the id counter becomes very large then this might kill performance, but in practise this will
@@ -56,7 +61,7 @@ class ECS:
         # incrementing.
         self._id_counter += 1
         return self._id_counter
-    
+
     def register_system(self, system: System, *event_types: Type):
         '''
         Registers system to be called for all of the event names passed.
@@ -83,7 +88,7 @@ class ECS:
         for system in recipients:
             system.process(self, event)
 
-    def create_entity(self, *components, identifier: Hashable=None) -> Entity:
+    def create_entity(self, pos: Tuple[int, int], *components, identifier: Hashable=None) -> Entity:
         '''
         Create a new entity containing the components specified. Identifier must be unique for each entity.
         If identifier is not specified, an identifier will be automatically chosen.
@@ -98,17 +103,43 @@ class ECS:
 
         entity = Entity(identifier, {type(c) : c for c in components})
 
-        self.entities[identifier] = entity
+        if pos in self._position_to_entity:
+            self._position_to_entity[pos].add(entity)
+        else:
+            self._position_to_entity[pos] = set([entity])
+
+        self._entity_to_position[entity] = pos
+        self.entities.add(entity)
         return entity
     
-    def remove_entity(self, identifier: Hashable):
-        del self.entities[identifier]
+    def remove_entity(self, entity: Entity):
+        pos = self._entity_to_position[entity]
+        self._position_to_entity[pos].remove(entity)
+        del self._entity_to_position[Entity]
+        del self.entities[entity]
+
+    def move_entity(self, entity: Entity, target: Tuple[int, int]):
+        '''
+        Use this function to change an entities position.
+        '''
+        old_pos = self.get_pos(entity)
+
+        # entity removed from grid
+        self._position_to_entity[old_pos].remove(entity)
+        
+        if target in self._position_to_entity:
+            self._position_to_entity[target].add(entity)
+        else:
+            self._position_to_entity[target] = set([entity])
+
+        self._entity_to_position[entity] = target
+
 
     def query_entities(self, query: Callable[[Entity], bool]) -> Generator[Entity, None, None]:
         '''
         O(n) query over all entities. 
         '''
-        return (entity for entity in self.entities.values() if query(entity))
+        return (entity for entity in self.entities if query(entity))
     
     def query_all_with_components(self, *component_types) -> Generator[Entity, None, None]:
         '''
@@ -128,6 +159,18 @@ class ECS:
             raise KeyError(f"Failed query for {component_type}, no entity for this component type exists.")
 
         return result[0]    
+    
+    def get_entities_at(self, pos: Tuple[int, int]) -> Set[Entity]:
+        '''
+        Return a set of entities at a given position
+        '''
+        return self._position_to_entity[pos]
+
+    def get_pos(self, entity: Entity) -> Tuple[int, int]:
+        '''
+        Use this to get the position of an entity.
+        '''
+        return self._entity_to_position[entity]
     
     def __getitem__(self, identifier):
         return self.entities[identifier]

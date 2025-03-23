@@ -20,7 +20,7 @@ class BehaviourSystem(ecs.System):
         pass
 
     def process(self, entity_manager, event: events.BehaviourTickEvent):
-        random_movers = entity_manager.query_all_with_components(components.RandomMoveBehaviourComponent, components.PositionComponent)
+        random_movers = entity_manager.query_all_with_components(components.RandomMoveBehaviourComponent)
         
         for mover in random_movers:
             mover.add(random.choice(BehaviourSystem.MOVES))

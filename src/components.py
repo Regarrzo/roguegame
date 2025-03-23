@@ -5,14 +5,6 @@ from dataclasses import dataclass, asdict
 from . import tiles
 
 @dataclass
-class PositionComponent:
-    y: int
-    x: int
-
-    def __iter__(self):
-        return iter(asdict(self).values())
-
-@dataclass
 class SpriteComponent:
     img_key: str
     z_index: int = 0
@@ -20,12 +12,6 @@ class SpriteComponent:
     def __iter__(self):
         return iter(asdict(self).values())
     
-@dataclass
-class TilemapComponent:
-    data: List[List[tiles.Tile]]
-    tile_resource_map: Dict[tiles.Tile, str]
-    tile_colliders: Set[tiles.Tile]
-
 @dataclass
 class PlayerControlComponent:
     pass

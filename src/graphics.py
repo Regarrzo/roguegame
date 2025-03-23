@@ -12,8 +12,7 @@ TILE_TO_IMG = {
 }
 
 class GraphicsSystem(ecs.System):
-    SPRITE_QUERY_COMPONENTS = {components.SpriteComponent, components.PositionComponent}
-    MAP_QUERY_COMPONENTS = {components.TilemapComponent}
+    SPRITE_QUERY_COMPONENTS = {components.SpriteComponent}
 
     def __init__(self, resources, window_dimensions=(800, 600), tile_scale=16):
         self.resources = resources
@@ -24,8 +23,8 @@ class GraphicsSystem(ecs.System):
     def _entity_sort(entity: ecs.Entity) -> int:
         return entity[components.SpriteComponent].z_index
     
-    def draw_entity(self, entity: ecs.Entity):
-        y_pos, x_pos = entity[components.PositionComponent]
+    def draw_entity(self, entity_manager: ecs.ECS, entity: ecs.Entity):
+        y_pos, x_pos = entity_manager.get_pos(entity)
         img = self.resources[entity[components.SpriteComponent].img_key]
         self.scr.blit(img, (x_pos * self.tile_scale, y_pos * self.tile_scale))
 
@@ -53,5 +52,5 @@ class GraphicsSystem(ecs.System):
         drawable_entities.sort(key=GraphicsSystem._entity_sort) # sort according to z index
 
         for entity in drawable_entities:
-            self.draw_entity(entity)
+            self.draw_entity(entity_manager, entity)
 

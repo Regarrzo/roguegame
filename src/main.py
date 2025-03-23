@@ -24,26 +24,25 @@ def main():
     
     # Load resources
     res = resources.load_res(configuration.RESOURCES_PATH, tile_scale=configuration.SCALE)
+
     # System initialization
     graphics_system = graphics.GraphicsSystem(res, tile_scale=configuration.SCALE, window_dimensions=configuration.WINDOW_DIMS)
-    game.register_system(graphics_system, events.RenderTickEvent)
-
     user_input_system = inputs.UserInputSystem()
-    game.register_system(user_input_system, events.UserInputEvent)
-
     physics_system = physics.PhysicsSystem()
-    game.register_system(physics_system, events.PhysicsTickEvent)
-
     behaviour_system = behaviour.BehaviourSystem()
+
+    game.register_system(graphics_system, events.RenderTickEvent)
+    game.register_system(user_input_system, events.UserInputEvent)
+    game.register_system(physics_system, events.PhysicsTickEvent)
     game.register_system(behaviour_system, events.BehaviourTickEvent)
 
     # Initialise game
     game.tilemap.generate_random_connected_rooms()
     
-    player = game.create_entity(*entity_definitions.player(*game.tilemap.get_random_empty_tile()))
+    game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.player())
 
     for _ in range(10):
-        rat = game.create_entity(*entity_definitions.rat(*game.tilemap.get_random_empty_tile()))
+        game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.rat())
 
     while True:
         pressed_keys = []

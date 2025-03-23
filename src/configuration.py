@@ -13,7 +13,3 @@ KEY_MAP = {
     pygame.K_RIGHT: components.MovementActionComponent(0, 1),
     pygame.K_LEFT: components.MovementActionComponent(0, -1)
 }
-
-PLAYER_IMAGE_KEY = os.path.join("res", "imgs", "player.png")
-RAT_IMAGE_KEY = os.path.join("res", "imgs", "rat.png")
-
