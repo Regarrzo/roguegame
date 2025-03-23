@@ -29,29 +29,26 @@ class GraphicsSystem(ecs.System):
         img = self.resources[entity[components.SpriteComponent].img_key]
         self.scr.blit(img, (x_pos * self.tile_scale, y_pos * self.tile_scale))
 
-    def draw_tilemap(self, tilemap: ecs.Entity):
-        
-        tm = tilemap[components.TilemapComponent].data
-        resource_map = tilemap[components.TilemapComponent].tile_resource_map
-        height, width = len(tm), len(tm[0])
+    def draw_tilemap(self, tilemap: tiles.Tilemap):
+    
+        height, width = tilemap.dims
 
         for y in range(height):
             for x in range(width):
-                tile = tm[y][x]
+                tile = tilemap[y, x]
                 screen_pos = x * self.tile_scale, y * self.tile_scale
-                img = self.resources[resource_map[tile]]
+                img = self.resources[tile.get_image_key()]
                 self.scr.blit(img, screen_pos)
 
 
     def process(self, entity_manager: ecs.ECS, event: ecs.Event):
         # this cound theoretically draw multiple tilemaps but this might never be necessary (maybe for chunked maps?)
         # generally the tilemap will be a singleton
-        drawable_tilemaps = list(entity_manager.query_all_with_components(*GraphicsSystem.MAP_QUERY_COMPONENTS))
         
-        for tilemap in drawable_tilemaps:
-            self.draw_tilemap(tilemap)
+        if isinstance(entity_manager, ecs.TilemapEcs):
+            # then we can draw a tilemap
+            self.draw_tilemap(entity_manager.tilemap)
 
-        
         drawable_entities = list(entity_manager.query_all_with_components(*GraphicsSystem.SPRITE_QUERY_COMPONENTS)) # get all drawable entities
         drawable_entities.sort(key=GraphicsSystem._entity_sort) # sort according to z index
 

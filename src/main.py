@@ -19,7 +19,7 @@ from . import behaviour
 def main():
     # ECS initialization
     pygame.init()
-    game = ecs.ECS()
+    game = ecs.TilemapEcs(tiles.Tilemap((16, 16)))
     clock = pygame.time.Clock()
     
     # Load resources
@@ -38,14 +38,12 @@ def main():
     game.register_system(behaviour_system, events.BehaviourTickEvent)
 
     # Initialise game
-    dungeon = game.create_entity(components.PositionComponent(0, 0), 
-                                 components.TilemapComponent(tiles.generate_map(), tiles.TILE_TO_IMG, tiles.TILE_COLLDIERS))
+    game.tilemap.generate_random_connected_rooms()
     
-    
-    player = game.create_entity(*entity_definitions.player(*tiles.get_valid_player_spawnpoint(dungeon[components.TilemapComponent].data)))
+    player = game.create_entity(*entity_definitions.player(*game.tilemap.get_random_empty_tile()))
 
     for _ in range(10):
-        rat = game.create_entity(*entity_definitions.rat(*tiles.get_valid_player_spawnpoint(dungeon[components.TilemapComponent].data)))
+        rat = game.create_entity(*entity_definitions.rat(*game.tilemap.get_random_empty_tile()))
 
     while True:
         pressed_keys = []

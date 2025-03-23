@@ -2,9 +2,13 @@
 Main ECS engine file. No game specific logic goes here. This file is also heavily type hinted.
 '''
 from __future__ import annotations
+
+
 from typing import *
 from dataclasses import field, dataclass
 from abc import ABC, abstractmethod
+
+from . import tiles
 
 @dataclass
 class Entity:
@@ -127,3 +131,14 @@ class ECS:
     
     def __getitem__(self, identifier):
         return self.entities[identifier]
+    
+class TilemapEcs(ECS):
+    '''
+    (Usually) singleton object central to the entity component system. This one comes with an included tilemap.
+    It stores entities and components and calls systems via events. It also stores and manages the tilemap.
+    '''
+    def __init__(self, tilemap: tiles.Tilemap):
+        super().__init__()
+        self.tilemap: tiles.Tilemap = tilemap
+    
+    
