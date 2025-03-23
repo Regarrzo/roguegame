@@ -70,4 +70,8 @@ def main():
 
         
     
-main()
+def run_game():
+    main()  # Keep calling main() within run_game()
+
+if __name__ == "__main__":
+    run_game()  # Change main() to run_game() here
