@@ -13,20 +13,7 @@ from . import tiles
 @dataclass
 class Entity:
     identifier: Hashable
-    components: Dict[Type, Any]
 
-    def add(self, component: Any):
-        self.components[type(component)] = component
-    
-    def __getitem__(self, component_type: Type) -> Any:
-        return self.components[component_type]
-    
-    def __setitem__(self, component_type: Type, to: Any) -> Any:
-        self.components[component_type] = to
-
-    def __delitem__(self, component_type: Type):
-        del self.components[component_type]
-    
     def __hash__(self):
         return hash(self.identifier)
 
@@ -40,16 +27,16 @@ class System(ABC):
     Systems for handling game logic via events.
     '''
     @abstractmethod
-    def process(self, entity_manager: ECS, event: Event):
+    def process(self, entity_manager: Ecs, event: Event):
         pass
 
-class ECS:
+class Ecs:
     '''
     (Usually) singleton object central to the entity component system.
     It stores entities and components and calls systems via events. 
     '''
     def __init__(self):
-        self.entities: Set[Entity] = set()
+        self.entities: Dict[Entity, Dict[Type, Any]] = {}
         self.systems: Dict[Entity, List[System]] = {}
         self._id_counter = 0
         self._position_to_entity: Dict[Tuple[int, int], Set[Entity]] = {}
@@ -101,7 +88,9 @@ class ECS:
         if identifier in self.entities:
             raise ValueError(f"Entity with identifier {identifier} already exists.")
 
-        entity = Entity(identifier, {type(c) : c for c in components})
+        components = {type(c) : c for c in components}
+        entity = Entity(identifier)
+        self.entities[entity] = components
 
         if pos in self._position_to_entity:
             self._position_to_entity[pos].add(entity)
@@ -109,7 +98,7 @@ class ECS:
             self._position_to_entity[pos] = set([entity])
 
         self._entity_to_position[entity] = pos
-        self.entities.add(entity)
+        
         return entity
     
     def remove_entity(self, entity: Entity):
@@ -117,6 +106,7 @@ class ECS:
         self._position_to_entity[pos].remove(entity)
         del self._entity_to_position[Entity]
         del self.entities[entity]
+        
 
     def move_entity(self, entity: Entity, target: Tuple[int, int]):
         '''
@@ -134,19 +124,18 @@ class ECS:
 
         self._entity_to_position[entity] = target
 
-
-    def query_entities(self, query: Callable[[Entity], bool]) -> Generator[Entity, None, None]:
+    def query_entities(self, query: Callable[[Self, Entity], bool]) -> Generator[Entity, None, None]:
         '''
         O(n) query over all entities. 
         '''
-        return (entity for entity in self.entities if query(entity))
+        return (entity for entity in self.entities if query(self, entity))
     
     def query_all_with_components(self, *component_types) -> Generator[Entity, None, None]:
         '''
         Queries all entities that have all of the specified components.
         '''
         # TODO: Improve the performance of this query if the current implementation is not fast enough.
-        return self.query_entities(lambda entity: set(component_types) <= entity.components.keys())
+        return self.query_entities(lambda em, entity: set(component_types) <= em.get_components(entity).keys())
     
     def query_single_with_component(self, component_type) -> Entity:
         '''
@@ -172,10 +161,21 @@ class ECS:
         '''
         return self._entity_to_position[entity]
     
+    def get_components(self, entity: Entity) -> Dict[Type, Any]:
+        return self.entities[entity]
+    
+    def add_components(self, entity: Entity, *components: Any):
+        for component in components:
+            self.get_components(entity)[type(component)] = component
+    
+    def remove_components(self, entity: Entity, *component_types: Type):
+        for component_type in component_types:
+            del self.get_components(entity)[component_type]
+
     def __getitem__(self, identifier):
         return self.entities[identifier]
     
-class TilemapEcs(ECS):
+class TilemapEcs(Ecs):
     '''
     (Usually) singleton object central to the entity component system. This one comes with an included tilemap.
     It stores entities and components and calls systems via events. It also stores and manages the tilemap.

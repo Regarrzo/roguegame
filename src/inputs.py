@@ -20,5 +20,5 @@ class UserInputSystem(ecs.System):
         targets = entity_manager.query_all_with_components(components.PlayerControlComponent)
     
         for target in targets:
-            target.add(action)
+            entity_manager.add_components(target, action)
 

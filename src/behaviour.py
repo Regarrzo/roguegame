@@ -19,8 +19,8 @@ class BehaviourSystem(ecs.System):
     def __init__(self):
         pass
 
-    def process(self, entity_manager, event: events.BehaviourTickEvent):
-        random_movers = entity_manager.query_all_with_components(components.RandomMoveBehaviourComponent)
+    def process(self, em: ecs.Ecs, event: events.BehaviourTickEvent):
+        random_movers = em.query_all_with_components(components.RandomMoveBehaviourComponent)
         
         for mover in random_movers:
-            mover.add(random.choice(BehaviourSystem.MOVES))
+            em.add_components(mover, random.choice(BehaviourSystem.MOVES))

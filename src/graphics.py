@@ -1,6 +1,8 @@
 import os
 import pygame
+import functools
 from dataclasses import dataclass, asdict
+
 
 from . import tiles
 from . import ecs
@@ -20,12 +22,12 @@ class GraphicsSystem(ecs.System):
         self.tile_scale = tile_scale
 
     @staticmethod
-    def _entity_sort(entity: ecs.Entity) -> int:
-        return entity[components.SpriteComponent].z_index
+    def _entity_sort(entity_manager: ecs.Ecs, entity: ecs.Entity) -> int:
+        return entity_manager.get_components(entity)[components.SpriteComponent].z_index
     
-    def draw_entity(self, entity_manager: ecs.ECS, entity: ecs.Entity):
-        y_pos, x_pos = entity_manager.get_pos(entity)
-        img = self.resources[entity[components.SpriteComponent].img_key]
+    def draw_entity(self, em: ecs.Ecs, entity: ecs.Entity):
+        y_pos, x_pos = em.get_pos(entity)
+        img = self.resources[em.get_components(entity)[components.SpriteComponent].img_key]
         self.scr.blit(img, (x_pos * self.tile_scale, y_pos * self.tile_scale))
 
     def draw_tilemap(self, tilemap: tiles.Tilemap):
@@ -40,17 +42,18 @@ class GraphicsSystem(ecs.System):
                 self.scr.blit(img, screen_pos)
 
 
-    def process(self, entity_manager: ecs.ECS, event: ecs.Event):
+    def process(self, em: ecs.Ecs, event: ecs.Event):
         # this cound theoretically draw multiple tilemaps but this might never be necessary (maybe for chunked maps?)
         # generally the tilemap will be a singleton
         
-        if isinstance(entity_manager, ecs.TilemapEcs):
+        if isinstance(em, ecs.TilemapEcs):
             # then we can draw a tilemap
-            self.draw_tilemap(entity_manager.tilemap)
+            self.draw_tilemap(em.tilemap)
 
-        drawable_entities = list(entity_manager.query_all_with_components(*GraphicsSystem.SPRITE_QUERY_COMPONENTS)) # get all drawable entities
-        drawable_entities.sort(key=GraphicsSystem._entity_sort) # sort according to z index
+        drawable_entities = list(em.query_all_with_components(*GraphicsSystem.SPRITE_QUERY_COMPONENTS)) # get all drawable entities
+        sorting_function = functools.partial(self._entity_sort, em)
+        drawable_entities.sort(key=sorting_function) # sort according to z index
 
         for entity in drawable_entities:
-            self.draw_entity(entity_manager, entity)
+            self.draw_entity(em, entity)
 

@@ -21,21 +21,12 @@ class Tile(Enum):
     def is_collider(self) -> str:
         return self in TILE_COLLDIERS
 
-
-
 TILE_TO_IMG = {
     Tile.EMPTY: os.path.join("res", "imgs", "empty.png"),
     Tile.WALL: os.path.join("res", "imgs", "wall.png"),
 }
 
 TILE_COLLDIERS = {Tile.WALL}
-
-
-
-
-
-
-
 
 class Tilemap:
     def __init__(self, dims: Tuple[int, int]=(16, 16), init_tile=Tile.EMPTY):

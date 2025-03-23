@@ -12,7 +12,7 @@ class PhysicsSystem(ecs.System):
         moving = em.query_all_with_components(components.MovementActionComponent)
         
         for entity in moving:
-            dy, dx = entity[components.MovementActionComponent]
+            dy, dx = em.get_components(entity)[components.MovementActionComponent]
             old_y, old_x =  em.get_pos(entity)
             new_pos = old_y + dy, old_x + dx
 
@@ -20,4 +20,4 @@ class PhysicsSystem(ecs.System):
                 # valid move
                 em.move_entity(entity, new_pos)
 
-            del entity[components.MovementActionComponent]
+            em.remove_components(entity, components.MovementActionComponent)
