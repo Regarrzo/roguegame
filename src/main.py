@@ -68,10 +68,11 @@ def main():
 
 
 
+main() #cmmit this line to run the game with menu
         
-    
-def run_game():
-    main()  # Keep calling main() within run_game()
+# uncommit this line to run the game with menu    
+# def run_game():
+#     main()  
 
-if __name__ == "__main__":
-    run_game()  # Change main() to run_game() here
+# if __name__ == "__main__":
+#     run_game()  
