@@ -24,6 +24,7 @@ class SpriteComponent:
 class TilemapComponent:
     data: List[List[tiles.Tile]]
     tile_resource_map: Dict[tiles.Tile, str]
+    tile_colliders: Set[tiles.Tile]
 
 @dataclass
 class PlayerControlComponent:
@@ -38,11 +39,10 @@ class MovementActionComponent:
     def __iter__(self):
         return iter(asdict(self).values())
 
-
 @dataclass
 class IdleActionComponent:
     pass
 
 @dataclass
-class CollisionComponent:
-    tile_colliders: Set[tiles.Tile]
+class RandomMoveBehaviourComponent:
+    pass

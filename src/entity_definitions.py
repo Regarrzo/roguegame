@@ -7,8 +7,14 @@ from . import configuration
 from . import ecs
 from . import components
 
-def make_player(y: int, x: int) -> Iterable[Any]:
+def player(y: int, x: int) -> Iterable[Any]:
     return (components.PositionComponent(y, x), 
             components.PlayerControlComponent(), 
             components.SpriteComponent(configuration.PLAYER_IMAGE_KEY),
+            )
+
+def rat(y: int, x: int) -> Iterable[Any]:
+    return (components.PositionComponent(y, x), 
+            components.RandomMoveBehaviourComponent(), 
+            components.SpriteComponent(configuration.RAT_IMAGE_KEY),
             )

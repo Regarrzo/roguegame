@@ -13,7 +13,7 @@ TILE_TO_IMG = {
 
 class GraphicsSystem(ecs.System):
     SPRITE_QUERY_COMPONENTS = {components.SpriteComponent, components.PositionComponent}
-    MAP_QUERY_COMPONENTS = {components.TilemapComponent, components.PositionComponent}
+    MAP_QUERY_COMPONENTS = {components.TilemapComponent}
 
     def __init__(self, resources, window_dimensions=(800, 600), tile_scale=16):
         self.resources = resources
@@ -32,14 +32,13 @@ class GraphicsSystem(ecs.System):
     def draw_tilemap(self, tilemap: ecs.Entity):
         
         tm = tilemap[components.TilemapComponent].data
-        y_offset, x_offset = tilemap[components.PositionComponent]
         resource_map = tilemap[components.TilemapComponent].tile_resource_map
         height, width = len(tm), len(tm[0])
 
         for y in range(height):
             for x in range(width):
                 tile = tm[y][x]
-                screen_pos = (x + x_offset) * self.tile_scale, (y + y_offset) * self.tile_scale
+                screen_pos = x * self.tile_scale, y * self.tile_scale
                 img = self.resources[resource_map[tile]]
                 self.scr.blit(img, screen_pos)
 

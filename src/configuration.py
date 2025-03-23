@@ -15,3 +15,4 @@ KEY_MAP = {
 }
 
 PLAYER_IMAGE_KEY = os.path.join("res", "imgs", "player.png")
+RAT_IMAGE_KEY = os.path.join("res", "imgs", "rat.png")

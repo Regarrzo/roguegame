@@ -16,6 +16,8 @@ TILE_TO_IMG = {
     Tile.WALL: os.path.join("res", "imgs", "wall.png"),
 }
 
+TILE_COLLDIERS = {Tile.WALL}
+
 def generate_map(dims=(32, 32), iters=1000, min_room_size=2, max_room_size=5, wall_weight=10):
     map_height, map_width = dims
     r = [[Tile.WALL] * map_width for _ in range(map_height)]
@@ -45,3 +47,6 @@ def generate_map(dims=(32, 32), iters=1000, min_room_size=2, max_room_size=5, wa
         util.grid2d_trace_path(r, path, Tile.EMPTY)
 
     return r
+
+def get_valid_player_spawnpoint(tiles: List[List[Tile]]):
+    return random.choice(list(util.grid2d_iterate_with_tile(tiles, Tile.EMPTY)))

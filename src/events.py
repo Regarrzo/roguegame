@@ -10,7 +10,11 @@ class RenderTickEvent(ecs.Event):
     dt: int
 
 @dataclass
-class LogicTickEvent(ecs.Event):
+class PhysicsTickEvent(ecs.Event):
+    pass
+
+@dataclass
+class BehaviourTickEvent(ecs.Event):
     pass
 
 @dataclass

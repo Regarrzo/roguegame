@@ -79,12 +79,12 @@ class ECS:
         for system in recipients:
             system.process(self, event)
 
-    def create_entity(self, *components, identifier: Hashable=None) -> Hashable:
+    def create_entity(self, *components, identifier: Hashable=None) -> Entity:
         '''
         Create a new entity containing the components specified. Identifier must be unique for each entity.
         If identifier is not specified, an identifier will be automatically chosen.
 
-        Returns: the identifier of the new entity
+        Returns: the new entity
         '''
         if identifier is None:
             identifier = self._next_id()
@@ -92,8 +92,10 @@ class ECS:
         if identifier in self.entities:
             raise ValueError(f"Entity with identifier {identifier} already exists.")
 
-        self.entities[identifier] = Entity(identifier, {type(c) : c for c in components})
-        return identifier
+        entity = Entity(identifier, {type(c) : c for c in components})
+
+        self.entities[identifier] = entity
+        return entity
     
     def remove_entity(self, identifier: Hashable):
         del self.entities[identifier]
