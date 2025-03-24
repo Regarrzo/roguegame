@@ -8,6 +8,7 @@ from dataclasses import dataclass, asdict
 from . import tiles
 from . import ecs
 from . import components
+from . import util
 
 TILE_TO_IMG = {
     tiles.Tile.EMPTY: os.path.join("res", "imgs", "empty.png"),
@@ -26,7 +27,7 @@ class GraphicsSystem(ecs.System):
     def _entity_sort(entity_manager: ecs.Ecs, entity: ecs.Entity) -> int:
         return entity_manager.get_components(entity)[components.SpriteComponent].z_index
     
-    def draw_entity(self, em: ecs.Ecs, entity: ecs.Entity):
+    def draw_entity(self, em: ecs.TilemapEcs, entity: ecs.Entity):
         y_pos, x_pos = em.get_pos(entity)
         img = self.resources[em.get_components(entity)[components.SpriteComponent].img_key]
         self.scr.blit(img, (x_pos * self.tile_scale, y_pos * self.tile_scale))
@@ -47,6 +48,12 @@ class GraphicsSystem(ecs.System):
             screen_pos = x * self.tile_scale, y * self.tile_scale
             self.scr.blit(img, screen_pos)
 
+    def draw_debug_square(self, em: ecs.TilemapEcs, pos: Tuple[int, int]):
+        img = self.resources[os.path.join("res", "imgs", "debug.png")]
+        y, x = pos
+        screen_pos = x * self.tile_scale, y * self.tile_scale
+        self.scr.blit(img, screen_pos)
+
 
     def process(self, em: ecs.Ecs, event: ecs.Event):
         # this cound theoretically draw multiple tilemaps but this might never be necessary (maybe for chunked maps?)
@@ -65,10 +72,10 @@ class GraphicsSystem(ecs.System):
 
         try:
             player = em.query_single_with_component(components.PlayerControlComponent)
+            player_pos = em.get_pos(player)
             pc: components.PlayerControlComponent = player.get_component(em, components.PlayerControlComponent)
-            
+
             if pc.autowalk_plan:
                 self.draw_path_preview(em, pc.autowalk_plan)
-                
         except KeyError:
             pass

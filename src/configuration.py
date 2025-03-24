@@ -2,10 +2,10 @@ import os
 import pygame
 from . import components
 
-WINDOW_DIMS = 64 * 16, 64 * 16
+WINDOW_DIMS = 32 * 32, 32 * 32
 TARGET_FPS = 60
 RESOURCES_PATH = "res"
-SCALE = 64
+SCALE = 32
 KEY_MAP = {
     pygame.K_SPACE: components.IdleActionComponent(),
     pygame.K_UP: components.MovementActionComponent(-1, 0),

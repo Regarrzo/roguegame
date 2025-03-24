@@ -20,7 +20,7 @@ from . import gamestep
 def main():
     # ECS initialization
     pygame.init()
-    game = ecs.TilemapEcs(tiles.Tilemap((16, 16)))
+    game = ecs.TilemapEcs(tiles.Tilemap((32, 32)))
     clock = pygame.time.Clock()
     
     # Load resources
@@ -40,6 +40,7 @@ def main():
     game.register_system(behaviour_system, events.BehaviourTickEvent)
     game.register_system(player_system, events.UserHoversTileWithMouseEvent, events.UserClicksTileWithMouseEvent, events.UserInputEvent, events.RenderTickEvent)
     game.register_system(gamestep_system, events.GamestepEvent)
+    
 
     # Initialise game
     game.tilemap.generate_random_connected_rooms()
@@ -48,6 +49,9 @@ def main():
 
     for _ in range(10):
         game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.rat())
+
+    for _ in range(5):
+        game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.goblin())
 
     while True:
         pressed_keys = []

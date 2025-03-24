@@ -20,6 +20,9 @@ class Tile(Enum):
     
     def is_collider(self) -> bool:
         return self in TILE_COLLDIERS
+    
+    def blocks_los(self) -> bool:
+        return self in LOS_BLOCKERS
 
 TILE_TO_IMG = {
     Tile.EMPTY: os.path.join("res", "imgs", "empty.png"),
@@ -27,6 +30,7 @@ TILE_TO_IMG = {
 }
 
 TILE_COLLDIERS = {Tile.WALL}
+LOS_BLOCKERS = {Tile.WALL}
 
 DEFAULT_TILE_WEIGHTS = {tile: float("inf") if tile.is_collider() else 1 for tile in Tile}
 
@@ -71,11 +75,11 @@ class Tilemap:
             if self._data[y][x] == tile: 
                 yield y, x
 
-    def get_graph(self, weights: Dict[Tile, float] = None, deltas: Tuple[Tuple] = ((1,0), (0,1), (-1,0), (0,-1))):
+    def get_graph(self, weights: Dict[Tile, float] = None, deltas_cost: Dict[Tuple[int, int] : float] = ((1,0), (0,1), (-1,0), (0,-1))):
         '''
-        Get a graph view for pathfinding. Will recompute the graph.
+        Get a graph view for pathfinding. Will recompute the graph. deltas_cost is a doct mapping deltas to their weight multiplier.
         '''
-        return util.Graph.from_2dgrid(self._data, weights, deltas)
+        return util.Graph.from_2dgrid(self._data, weights, deltas_cost)
     
     def generate_random_connected_rooms(self, iters=1000, min_room_size=2, max_room_size=5, wall_weight=10):
         map_height, map_width = self.dims
@@ -100,7 +104,7 @@ class Tilemap:
         for room, next_room in zip(rooms, rooms[1:]):
             pathfind_origin = util.get_rect_center(*room)
             pathfind_dest = util.get_rect_center(*next_room)
-            graph = util.Graph.from_2dgrid(r, weights={Tile.EMPTY: 1, Tile.WALL: wall_weight})
+            graph = util.Graph.from_2dgrid(r, weights={Tile.EMPTY: 1, Tile.WALL: wall_weight}, deltas_cost=util.CARDINAL_DELTAS_COST)
             _, prev = graph.pathfind(pathfind_origin, pathfind_dest)
             path = graph.trace_path(prev, pathfind_dest)
             util.grid2d_trace_path(r, path, Tile.EMPTY)
@@ -110,6 +114,16 @@ class Tilemap:
     def get_random_empty_tile(self):
         return random.choice(list(self.iterate_with_tile(Tile.EMPTY)))
     
+    def in_los(self, origin: Tuple[int, int], destination: Tuple[int, int]) -> bool:
+        '''
+        Returns true if destination can be seen from origin.
+        '''
+        for pos in util.iterate_line(origin, destination):
+            if self[pos].blocks_los():
+                return False
+
+        return True
+
     def iterate_radius(self, origin: Tuple[int, int], radius: float, deltas: Tuple[Tuple[int, int]] = ((1,0), (0,1), (-1,0), (0,-1))) -> Generator[int, None, None]:
         '''
         Iterate through all tiles whose center lies in the specified radius from the position.

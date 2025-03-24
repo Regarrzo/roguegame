@@ -4,6 +4,13 @@ from dataclasses import dataclass, field, asdict
 from typing import *
 import itertools
 
+CARDINAL_DELTAS = [(1,0), (0,1), (0,-1), (-1,0)]
+DIAGONAL_DELTAS = [(1,1), (-1,-1), (1,-1), (-1, 1)]
+
+CARDINAL_DELTAS_COST = {delta: 1 for delta in CARDINAL_DELTAS}
+DIAGONAL_DELTAS_COST = {delta: 1.41 for delta in DIAGONAL_DELTAS}
+
+
 def is_in_2dgrid_bounds(grid: List[List], tup: Tuple[int, int]) -> bool:
     height, width = len(grid), len(grid[0])
     y, x = tup
@@ -149,7 +156,7 @@ class Graph:
         return path
 
     @staticmethod
-    def from_2dgrid(grid: List[List[Hashable]], weights: Dict = None, deltas: Tuple[Tuple] = ((1,0), (0,1), (-1,0), (0,-1))) -> Graph:
+    def from_2dgrid(grid: List[List[Hashable]], weights: Dict = None, deltas_cost: Dict[Tuple[int, int] : float] = ((1,0), (0,1), (-1,0), (0,-1))) -> Graph:
         '''
         Generate a graph from a 2 dimensional grid.
         '''
@@ -160,13 +167,13 @@ class Graph:
         for i, j in itertools.product(range(height), range(width)):
             r.add((i, j))
 
-            for di, dj in deltas:
+            for (di, dj), cost in deltas_cost.items():
                 ci, cj = (i + di, j + dj)
 
                 if is_in_2dgrid_bounds(grid, (ci, cj)):
                     r.add((ci, cj))
                     w = weights[grid[ci][cj]] if weights else 1
-                    r.connect((i, j), (ci, cj), w)
+                    r.connect((i, j), (ci, cj), w * cost)
 
         return r
                     
@@ -179,24 +186,67 @@ def distance(a: Tuple[int, int], b: Tuple[int, int]) -> float:
 
     return ((y_a - y_b) ** 2 + (x_a - x_b) ** 2) ** 0.5
 
+def _iterate_line_low(y0, x0, y1, x1) -> Generator[Tuple[int, int], None, None]:
+    dy = y1 - y0
+    dx = x1 - x0
+
+    yi = 1
+
+    if dy < 0:
+        yi = -1
+        dy = -dy
+    
+    D = 2 * dy - dx
+    y = y0
+
+    for x in get_integers_between(x0, x1):
+        yield y, x
+
+        if D > 0:
+            y = y + yi
+            D = D + (2 * (dy - dx))
+        else:
+            D = D + 2 * dy
+
+
+def _iterate_line_high(y0, x0, y1, x1) -> Generator[Tuple[int, int], None, None]:
+    dy = y1 - y0
+    dx = x1 - x0
+
+    xi = 1
+
+    if dx < 0:
+        xi = -1
+        dx = -dx
+
+    D = (2 * dx) - dy
+    x = x0
+
+    for y in get_integers_between(y0, y1):
+        yield y, x
+
+        if D > 0:
+            x = x + xi
+            D = D + (2 * (dx - dy))
+        else:
+            D = D + 2 * dx
+
 def iterate_line(start: Tuple[int, int], end: Tuple[int, int]) -> Generator[Tuple[int, int], None, None]:
     y0, x0 = start
     y1, x1 = end
 
-    dy = y1 - y0
-    dx = x1 - x0
+    if abs(y1 - y0) < abs(x1 - x0):
+        if x0 > x1:
+            return _iterate_line_low(y1, x1, y0, x0)
+        else:
+            return _iterate_line_low(y0, x0, y1, x1)
+    else:
+        if y0 > y1:
+            return _iterate_line_high(y1, x1, y0, x0)
+        else:
+            return _iterate_line_high(y0, x0, y1, x1)
 
-    D = 2 * dy - dx
-    y = y0
 
-    for x in range(x0, x1, 1 if x0 < x1 else -1):
-        yield y, x
-
-        if D > 0:
-            y = y + 1
-            D = D - 2 * dx
-
-        D = D + 2 * dy
 
 def reverse_tuple(a: Tuple):
     return tuple(reversed(a))
@@ -212,3 +262,10 @@ def top(t: Tuple, op):
     Performs op on every element of the tuple.
     '''
     return tuple((op(x) for x in t))
+
+def get_integers_between(a: int, b: int):
+    '''
+    Similar to range() but inclusive and does not care which one is bigger.
+    '''
+    direction = 1 if b >= a else -1
+    return range(a, b + direction, direction)

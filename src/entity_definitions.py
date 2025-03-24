@@ -8,7 +8,7 @@ from . import configuration
 from . import ecs
 from . import components
 
-def player() -> Iterable[Any]:
+def player() -> Iterable[ecs.Component]:
     return (components.PlayerControlComponent(), 
             components.SpriteComponent(os.path.join("res", "imgs", "player.png")),
             components.CollisionComponent()
@@ -19,3 +19,10 @@ def rat() -> Iterable[Any]:
             components.SpriteComponent(os.path.join("res", "imgs", "rat.png")),
             components.CollisionComponent()
             )
+
+def goblin() -> Iterable[ecs.Component]:
+    return (components.SpriteComponent(os.path.join("res", "imgs", "goblin.png")),
+            components.CollisionComponent(),
+            components.SimpleHostileBehaviourComponent(sight_range=10),
+            components.PathfindTargetComponent()
+        )
