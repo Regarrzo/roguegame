@@ -18,7 +18,7 @@ class Tile(Enum):
     def get_image_key(self) -> str:
         return TILE_TO_IMG[self]
     
-    def is_collider(self) -> str:
+    def is_collider(self) -> bool:
         return self in TILE_COLLDIERS
 
 TILE_TO_IMG = {
@@ -107,3 +107,29 @@ class Tilemap:
 
     def get_random_empty_tile(self):
         return random.choice(list(self.iterate_with_tile(Tile.EMPTY)))
+
+    def iterate_radius(self, origin: Tuple[int, int], radius: float, deltas: Tuple[Tuple[int, int]] = ((1,0), (0,1), (-1,0), (0,-1))) -> Generator[int, None, None]:
+        '''
+        Iterate through all tiles whose center lies in the specified radius from the position.
+        '''
+
+        visited = set()
+        to_visit = [origin]
+
+        while to_visit:
+            curr = to_visit.pop()
+            visited.add(curr)
+            dist_to_origin = util.distance(curr, origin)
+
+            if dist_to_origin <= radius:
+                yield curr
+            else:
+                continue
+            
+            for dy, dx in deltas:
+                curr_y, curr_x = curr
+                new = curr_y + dy, curr_x + dx
+                
+                if self.pos_is_in_bounds(new) and new not in visited and new not in to_visit:
+                    to_visit.append(new)
+        

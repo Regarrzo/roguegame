@@ -16,6 +16,9 @@ class Entity:
 
     def __hash__(self):
         return hash(self.identifier)
+    
+    def has_component(self, em: Ecs, component: Any) -> bool:
+        return component in em.get_components(self)
 
 class Event(ABC):
     '''
@@ -151,8 +154,10 @@ class Ecs:
     
     def get_entities_at(self, pos: Tuple[int, int]) -> Set[Entity]:
         '''
-        Return a set of entities at a given position
+        Return a set of entities at a given position.
         '''
+        if pos not in self._position_to_entity:
+            return set()
         return self._position_to_entity[pos]
 
     def get_pos(self, entity: Entity) -> Tuple[int, int]:

@@ -56,13 +56,10 @@ def main():
 
         if pressed_keys:
             game.emit_event(events.UserInputEvent(pressed_keys))
-            game.emit_event(events.BehaviourTickEvent())
-            game.emit_event(events.PhysicsTickEvent())
 
         pygame.display.flip()
         dt = clock.tick(configuration.TARGET_FPS)
         game.emit_event(events.RenderTickEvent(dt))
-
 
 
 main() #cmmit this line to run the game with menu

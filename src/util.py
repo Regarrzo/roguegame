@@ -1,7 +1,7 @@
 from __future__ import annotations
 import heapq
 from dataclasses import dataclass, field, asdict
-from typing import Any, List, Dict, Tuple, Set, Hashable
+from typing import *
 import itertools
 
 def is_in_2dgrid_bounds(grid: List[List], tup: Tuple[int, int]) -> bool:
@@ -173,4 +173,28 @@ class Graph:
 def grid2d_to_string(grid: List[List[Hashable]]) -> str:
     return "\n".join(" ".join(str(cell) for cell in row) for row in grid)
 
+def distance(a: Tuple[int, int], b: Tuple[int, int]) -> float:
+    y_a, x_a = a
+    y_b, x_b = b
+
+    return ((y_a - y_b) ** 2 + (x_a - x_b) ** 2) ** 0.5
+
+def iterate_line(start: Tuple[int, int], end: Tuple[int, int]) -> Generator[Tuple[int, int], None, None]:
+    y0, x0 = start
+    y1, x1 = end
+
+    dy = y1 - y0
+    dx = x1 - x0
+
+    D = 2 * dy - dx
+    y = y0
+
+    for x in range(x0, x1, 1 if x0 < x1 else -1):
+        yield y, x
+
+        if D > 0:
+            y = y + 1
+            D = D - 2 * dx
+
+        D = D + 2 * dy
 

@@ -30,5 +30,9 @@ class IdleActionComponent:
     pass
 
 @dataclass
-class RandomMoveBehaviourComponent:
+class DumbPeacefulBehaviourComponent:
+    sight_range: int = 2
+
+@dataclass
+class CollisionComponent:
     pass

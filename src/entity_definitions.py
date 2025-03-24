@@ -11,9 +11,11 @@ from . import components
 def player() -> Iterable[Any]:
     return (components.PlayerControlComponent(), 
             components.SpriteComponent(os.path.join("res", "imgs", "player.png")),
+            components.CollisionComponent()
             )
 
 def rat() -> Iterable[Any]:
-    return (components.RandomMoveBehaviourComponent(), 
+    return (components.DumbPeacefulBehaviourComponent(), 
             components.SpriteComponent(os.path.join("res", "imgs", "rat.png")),
+            components.CollisionComponent()
             )

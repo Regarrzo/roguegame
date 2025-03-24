@@ -22,3 +22,5 @@ class UserInputSystem(ecs.System):
         for target in targets:
             entity_manager.add_components(target, action)
 
+        entity_manager.emit_event(events.BehaviourTickEvent())
+        entity_manager.emit_event(events.PhysicsTickEvent())
