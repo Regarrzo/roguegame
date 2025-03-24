@@ -1,8 +1,9 @@
+from typing import *
+
 import os
 import pygame
 import functools
 from dataclasses import dataclass, asdict
-
 
 from . import tiles
 from . import ecs
@@ -31,7 +32,6 @@ class GraphicsSystem(ecs.System):
         self.scr.blit(img, (x_pos * self.tile_scale, y_pos * self.tile_scale))
 
     def draw_tilemap(self, tilemap: tiles.Tilemap):
-    
         height, width = tilemap.dims
 
         for y in range(height):
@@ -40,6 +40,12 @@ class GraphicsSystem(ecs.System):
                 screen_pos = x * self.tile_scale, y * self.tile_scale
                 img = self.resources[tile.get_image_key()]
                 self.scr.blit(img, screen_pos)
+
+    def draw_path_preview(self, em: ecs.Ecs, path: List[Tuple[int, int]]):
+        img = self.resources[os.path.join("res", "imgs", "path_tile.png")]
+        for y, x in path:
+            screen_pos = x * self.tile_scale, y * self.tile_scale
+            self.scr.blit(img, screen_pos)
 
 
     def process(self, em: ecs.Ecs, event: ecs.Event):
@@ -57,3 +63,12 @@ class GraphicsSystem(ecs.System):
         for entity in drawable_entities:
             self.draw_entity(em, entity)
 
+        try:
+            player = em.query_single_with_component(components.PlayerControlComponent)
+            pc: components.PlayerControlComponent = player.get_component(em, components.PlayerControlComponent)
+            
+            if pc.autowalk_plan:
+                self.draw_path_preview(em, pc.autowalk_plan)
+                
+        except KeyError:
+            pass

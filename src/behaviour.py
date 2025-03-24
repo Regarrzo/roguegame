@@ -37,9 +37,6 @@ class BehaviourSystem(ecs.System):
         valid_moves.sort(key=distance_to_threat)
         return valid_moves[-1]
 
-        
-
-
     def process(self, em: ecs.Ecs, event: events.BehaviourTickEvent):
         dumb_peaceful = em.query_all_with_components(components.DumbPeacefulBehaviourComponent)
 

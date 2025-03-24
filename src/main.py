@@ -14,7 +14,8 @@ from . import inputs
 from . import physics
 from . import entity_definitions
 from . import behaviour
-
+from . import player
+from . import gamestep
 
 def main():
     # ECS initialization
@@ -30,11 +31,15 @@ def main():
     user_input_system = inputs.UserInputSystem()
     physics_system = physics.PhysicsSystem()
     behaviour_system = behaviour.BehaviourSystem()
+    player_system = player.PlayerSystem()
+    gamestep_system = gamestep.GamestepSystem()
 
     game.register_system(graphics_system, events.RenderTickEvent)
-    game.register_system(user_input_system, events.UserInputEvent)
+    game.register_system(user_input_system, events.UserInputEvent, events.RenderTickEvent)
     game.register_system(physics_system, events.PhysicsTickEvent)
     game.register_system(behaviour_system, events.BehaviourTickEvent)
+    game.register_system(player_system, events.UserHoversTileWithMouseEvent, events.UserClicksTileWithMouseEvent, events.UserInputEvent, events.RenderTickEvent)
+    game.register_system(gamestep_system, events.GamestepEvent)
 
     # Initialise game
     game.tilemap.generate_random_connected_rooms()
@@ -59,9 +64,8 @@ def main():
 
         pygame.display.flip()
         dt = clock.tick(configuration.TARGET_FPS)
-        game.emit_event(events.RenderTickEvent(dt))
-
-
+        game.emit_event(events.RenderTickEvent(dt, util.reverse_tuple(pygame.mouse.get_pos()), pygame.mouse.get_pressed()[0]))
+ 
 main() #cmmit this line to run the game with menu
         
 # uncommit this line to run the game with menu    

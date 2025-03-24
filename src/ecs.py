@@ -17,8 +17,11 @@ class Entity:
     def __hash__(self):
         return hash(self.identifier)
     
-    def has_component(self, em: Ecs, component: Any) -> bool:
+    def has_component(self, em: Ecs, component: Type) -> bool:
         return component in em.get_components(self)
+    
+    def get_component(self, em: Ecs, component: Type) -> Any:
+        return em.get_components(self)[component]
 
 class Event(ABC):
     '''

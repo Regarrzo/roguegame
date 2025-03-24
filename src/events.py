@@ -8,6 +8,8 @@ from . import ecs
 @dataclass
 class RenderTickEvent(ecs.Event):
     dt: int
+    mouse_pos: Tuple[int, int]
+    left_click: bool
 
 @dataclass
 class PhysicsTickEvent(ecs.Event):
@@ -19,5 +21,16 @@ class BehaviourTickEvent(ecs.Event):
 
 @dataclass
 class UserInputEvent(ecs.Event):
-    def __init__(self, keys: List[int]):
-        self.keys = keys
+    keys: List[int]
+
+@dataclass
+class UserHoversTileWithMouseEvent(ecs.Event):
+    pos: Tuple[int, int]
+
+@dataclass
+class UserClicksTileWithMouseEvent(ecs.Event):
+    pos: Tuple[int, int]
+
+@dataclass
+class GamestepEvent(ecs.Event):
+    pass

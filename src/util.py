@@ -136,7 +136,7 @@ class Graph:
 
         return dist, prev
     
-    def trace_path(self, prev: Dict, dest: Hashable) -> List[Hashable]:
+    def trace_path(self, prev: Dict, dest: Hashable) -> Iterable[Hashable]:
         '''
         After pathfinding, this can convert the returned prev dict and a destination into an actual path, i.e. a list of nodes.
         '''
@@ -198,3 +198,17 @@ def iterate_line(start: Tuple[int, int], end: Tuple[int, int]) -> Generator[Tupl
 
         D = D + 2 * dy
 
+def reverse_tuple(a: Tuple):
+    return tuple(reversed(a))
+
+def top2(ta: Tuple, tb: Tuple, op):
+    '''
+    Performs op element wise between ta and tb
+    '''
+    return tuple((op(a, b) for a, b in zip(ta, tb)))
+
+def top(t: Tuple, op):
+    '''
+    Performs op on every element of the tuple.
+    '''
+    return tuple((op(x) for x in t))

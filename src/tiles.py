@@ -28,6 +28,8 @@ TILE_TO_IMG = {
 
 TILE_COLLDIERS = {Tile.WALL}
 
+DEFAULT_TILE_WEIGHTS = {tile: float("inf") if tile.is_collider() else 1 for tile in Tile}
+
 class Tilemap:
     def __init__(self, dims: Tuple[int, int]=(16, 16), init_tile=Tile.EMPTY):
         self.dims = dims
@@ -107,7 +109,7 @@ class Tilemap:
 
     def get_random_empty_tile(self):
         return random.choice(list(self.iterate_with_tile(Tile.EMPTY)))
-
+    
     def iterate_radius(self, origin: Tuple[int, int], radius: float, deltas: Tuple[Tuple[int, int]] = ((1,0), (0,1), (-1,0), (0,-1))) -> Generator[int, None, None]:
         '''
         Iterate through all tiles whose center lies in the specified radius from the position.
@@ -133,3 +135,5 @@ class Tilemap:
                 if self.pos_is_in_bounds(new) and new not in visited and new not in to_visit:
                     to_visit.append(new)
         
+
+    

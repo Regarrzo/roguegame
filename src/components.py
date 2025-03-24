@@ -14,8 +14,9 @@ class SpriteComponent:
     
 @dataclass
 class PlayerControlComponent:
-    pass
-
+    do_autowalk: bool = False
+    autowalk_plan: List[Tuple[int, int]] = None
+    
 
 @dataclass
 class MovementActionComponent:
