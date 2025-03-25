@@ -27,21 +27,52 @@ class GraphicsSystem(ecs.System):
     def _entity_sort(entity_manager: ecs.Ecs, entity: ecs.Entity) -> int:
         return entity_manager.get_components(entity)[components.SpriteComponent].z_index
     
-    def draw_entity(self, em: ecs.TilemapEcs, entity: ecs.Entity):
+    def draw_entity(self, em: ecs.TilemapEcs, entity: ecs.Entity, visibility: Set[Tuple[int, int]] = None):
         y_pos, x_pos = em.get_pos(entity)
+
+        if visibility is not None and (y_pos, x_pos) not in visibility:
+            return
+        
         img = self.resources[em.get_components(entity)[components.SpriteComponent].img_key]
         self.scr.blit(img, (x_pos * self.tile_scale, y_pos * self.tile_scale))
 
-    def draw_tilemap(self, tilemap: tiles.Tilemap):
+    def draw_tile(self, tile: tiles.Tile, pos: Tuple[int, int], fog_of_war_filter=False):
+        y, x = pos
+        screen_pos = x * self.tile_scale, y * self.tile_scale
+        img = self.resources[tile.get_image_key()]
+
+        if not fog_of_war_filter:
+            self.scr.blit(img, screen_pos)
+        else:
+            self.scr.blit(pygame.transform.grayscale(img), screen_pos)
+
+
+
+    def draw_tilemap(self, tilemap: tiles.Tilemap, visiblity: Set[Tuple[int, int]] = None, discovered: Set[Tuple[int, int]] = None):
         height, width = tilemap.dims
 
         for y in range(height):
             for x in range(width):
                 tile = tilemap[y, x]
-                screen_pos = x * self.tile_scale, y * self.tile_scale
-                img = self.resources[tile.get_image_key()]
-                self.scr.blit(img, screen_pos)
+                self.draw_tile(tile, (y, x))
+    
+    def draw_tilemap_with_visibility(self, tilemap: tiles.Tilemap, visiblity: Set[Tuple[int, int]], discovered: Set[Tuple[int, int]]):
+        height, width = tilemap.dims
+        hidden_img = self.resources[os.path.join("res", "imgs", "hidden.png")]
 
+        for y in range(height):
+            for x in range(width):
+                if (y, x) in visiblity:
+                    tile = tilemap[y, x]
+                    self.draw_tile(tile, (y, x))
+                elif (y, x) in discovered:
+                    tile = tilemap[y, x]
+                    self.draw_tile(tile, (y, x), fog_of_war_filter=True)
+                else:
+                    screen_pos = x * self.tile_scale, y * self.tile_scale
+                    self.scr.blit(hidden_img, screen_pos)
+
+                
     def draw_path_preview(self, em: ecs.Ecs, path: List[Tuple[int, int]]):
         img = self.resources[os.path.join("res", "imgs", "path_tile.png")]
         for y, x in path:
@@ -58,24 +89,23 @@ class GraphicsSystem(ecs.System):
     def process(self, em: ecs.Ecs, event: ecs.Event):
         # this cound theoretically draw multiple tilemaps but this might never be necessary (maybe for chunked maps?)
         # generally the tilemap will be a singleton
+        self.scr.fill((0, 0, 0))
+
+
+        player = em.query_single_with_component(components.PlayerControlComponent)
+        pc: components.PlayerControlComponent = player.get_component(em, components.PlayerControlComponent)
+
         
         if isinstance(em, ecs.TilemapEcs):
             # then we can draw a tilemap
-            self.draw_tilemap(em.tilemap)
+            self.draw_tilemap_with_visibility(em.tilemap, pc.visible, pc.discovered)
 
         drawable_entities = list(em.query_all_with_components(*GraphicsSystem.SPRITE_QUERY_COMPONENTS)) # get all drawable entities
         sorting_function = functools.partial(self._entity_sort, em)
         drawable_entities.sort(key=sorting_function) # sort according to z index
 
         for entity in drawable_entities:
-            self.draw_entity(em, entity)
+            self.draw_entity(em, entity, visibility=pc.visible)
 
-        try:
-            player = em.query_single_with_component(components.PlayerControlComponent)
-            player_pos = em.get_pos(player)
-            pc: components.PlayerControlComponent = player.get_component(em, components.PlayerControlComponent)
-
-            if pc.autowalk_plan:
-                self.draw_path_preview(em, pc.autowalk_plan)
-        except KeyError:
-            pass
+        if pc.autowalk_plan:
+            self.draw_path_preview(em, pc.autowalk_plan)

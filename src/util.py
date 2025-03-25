@@ -237,12 +237,12 @@ def iterate_line(start: Tuple[int, int], end: Tuple[int, int]) -> Generator[Tupl
 
     if abs(y1 - y0) < abs(x1 - x0):
         if x0 > x1:
-            return _iterate_line_low(y1, x1, y0, x0)
+            return reversed(list(_iterate_line_low(y1, x1, y0, x0)))
         else:
             return _iterate_line_low(y0, x0, y1, x1)
     else:
         if y0 > y1:
-            return _iterate_line_high(y1, x1, y0, x0)
+            return reversed(list(_iterate_line_high(y1, x1, y0, x0)))
         else:
             return _iterate_line_high(y0, x0, y1, x1)
 

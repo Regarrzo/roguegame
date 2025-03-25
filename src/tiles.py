@@ -118,13 +118,13 @@ class Tilemap:
         '''
         Returns true if destination can be seen from origin.
         '''
-        for pos in util.iterate_line(origin, destination):
+        for pos in list(util.iterate_line(origin, destination))[:-1]:
             if self[pos].blocks_los():
                 return False
 
         return True
 
-    def iterate_radius(self, origin: Tuple[int, int], radius: float, deltas: Tuple[Tuple[int, int]] = ((1,0), (0,1), (-1,0), (0,-1))) -> Generator[int, None, None]:
+    def iterate_radius(self, origin: Tuple[int, int], radius: float, deltas: Tuple[Tuple[int, int]] = ((1,0), (0,1), (-1,0), (0,-1))) -> Generator[Tuple[int, int], None, None]:
         '''
         Iterate through all tiles whose center lies in the specified radius from the position.
         '''

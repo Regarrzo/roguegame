@@ -38,7 +38,7 @@ def main():
     game.register_system(user_input_system, events.UserInputEvent, events.RenderTickEvent)
     game.register_system(physics_system, events.PhysicsTickEvent)
     game.register_system(behaviour_system, events.BehaviourTickEvent)
-    game.register_system(player_system, events.UserHoversTileWithMouseEvent, events.UserClicksTileWithMouseEvent, events.UserInputEvent, events.RenderTickEvent)
+    game.register_system(player_system, events.UserHoversTileWithMouseEvent, events.UserClicksTileWithMouseEvent, events.UserInputEvent, events.RenderTickEvent, events.AfterPhysicsTickEvent)
     game.register_system(gamestep_system, events.GamestepEvent)
     
 
@@ -47,11 +47,13 @@ def main():
     
     game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.player())
 
-    for _ in range(10):
+    for _ in range(1):
         game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.rat())
 
-    for _ in range(5):
+    for _ in range(1):
         game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.goblin())
+
+    game.emit_event(events.GamestepEvent())
 
     while True:
         pressed_keys = []

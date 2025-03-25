@@ -21,4 +21,4 @@ class GamestepSystem(ecs.System):
 
         em.emit_event(events.BehaviourTickEvent())
         em.emit_event(events.PhysicsTickEvent())
-        
+        em.emit_event(events.AfterPhysicsTickEvent())

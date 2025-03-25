@@ -25,11 +25,19 @@ class PathfindTargetComponent(ecs.Component):
     plan: List[Tuple[int, int]] = None
 
 
-@dataclass
 class PlayerControlComponent(ecs.Component):
-    do_autowalk: bool = False
-    autowalk_plan: List[Tuple[int, int]] = None
-    autowalk_timer: int = 0
+    def __init__(self):
+        self.visible: Set[Tuple[int, int]] = set()
+        self.discovered: Set[Tuple[int, int]] = set()
+
+
+        self.do_autowalk: bool = False
+        self.autowalk_plan: List[Tuple[int, int]] = None
+        self.autowalk_timer: int = 0
+
+
+
+        
     
 
 @dataclass

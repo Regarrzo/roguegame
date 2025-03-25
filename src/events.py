@@ -16,6 +16,11 @@ class PhysicsTickEvent(ecs.Event):
     pass
 
 @dataclass
+class AfterPhysicsTickEvent(ecs.Event):
+    pass
+
+
+@dataclass
 class BehaviourTickEvent(ecs.Event):
     pass
 
