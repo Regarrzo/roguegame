@@ -11,6 +11,13 @@ CARDINAL_DELTAS_COST = {delta: 1 for delta in CARDINAL_DELTAS}
 DIAGONAL_DELTAS_COST = {delta: 1.41 for delta in DIAGONAL_DELTAS}
 
 
+def manhatten_distance(a, b):
+    return sum(abs(a_i - b_i) for a_i, b_i in zip(a, b))
+
+def chebyshev_distance(a, b):
+    return max(abs(a_i - b_i) for a_i, b_i in zip(a, b))
+
+
 def is_in_2dgrid_bounds(grid: List[List], tup: Tuple[int, int]) -> bool:
     height, width = len(grid), len(grid[0])
     y, x = tup
@@ -109,20 +116,21 @@ class Graph:
         self.connect(a, b, weight)
         self.connect(b, a, weight)
 
-    def pathfind(self, origin, dest=None) -> Tuple[Dict, Dict]:
+    def pathfind(self, origin, dest=None, heuristic=lambda x, y: 0) -> Tuple[Dict, Dict]:
         '''
-        Early exit if dest is set.
+        Early exit if dest is set. Faster if a suitable heuristic is given.
         Returns: (distances dict, previous node dict)
         '''
         pq = []
-        dist = {origin: 0}
+        real_dist = {origin: 0}
+        heuristic_dist = {origin: heuristic(origin, dest)}
         prev = {}
-        heapq.heappush(pq, _DistEdge(0, 0, origin))
+        heapq.heappush(pq, _DistEdge(0, heuristic_dist[origin], origin))
 
         while pq:
             _, total_dist, curr_vertex = heapq.heappop(pq)
 
-            if dist[curr_vertex] != total_dist:
+            if heuristic_dist[curr_vertex] != total_dist:
                 continue
 
             if dest is not None and curr_vertex == dest:
@@ -131,17 +139,20 @@ class Graph:
             for edge in self.edges[curr_vertex]:
                 child_weight, child_vertex = edge
 
-                if child_vertex not in dist:
-                    dist[child_vertex] = float("inf")
+                if child_vertex not in real_dist:
+                    real_dist[child_vertex] = float("inf")
                 
-                alt = dist[curr_vertex] + child_weight
+                alt = real_dist[curr_vertex] + child_weight
 
-                if alt < dist[child_vertex]:
+                if alt < real_dist[child_vertex]:
                     prev[child_vertex] = curr_vertex
-                    dist[child_vertex] = alt
-                    heapq.heappush(pq, _DistEdge.from_edge(edge, alt))
+                    real_dist[child_vertex] = alt 
+                    h_dist = alt + heuristic(child_vertex, dest)
+                    heuristic_dist[child_vertex] = h_dist
+                    heapq.heappush(pq, _DistEdge.from_edge(edge, h_dist))
 
-        return dist, prev
+
+        return real_dist, prev
     
     def trace_path(self, prev: Dict, dest: Hashable) -> Iterable[Hashable]:
         '''

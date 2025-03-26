@@ -21,7 +21,7 @@ class PlayerSystem(ecs.System):
                 for edge in graph.edges[node]:
                     edge.weight = float("inf")
 
-        dist, prev = graph.pathfind(pos, dest)
+        dist, prev = graph.pathfind(pos, dest, heuristic=util.chebyshev_distance)
         return list(graph.trace_path(prev, dest))
 
     def autowalk_step(self, em: ecs.TilemapEcs, player: ecs.Entity, pc: components.PlayerControlComponent) -> bool:

@@ -98,7 +98,8 @@ class GraphicsSystem(ecs.System):
         
         if isinstance(em, ecs.TilemapEcs):
             # then we can draw a tilemap
-            self.draw_tilemap_with_visibility(em.tilemap, pc.visible, pc.discovered)
+            #self.draw_tilemap_with_visibility(em.tilemap, pc.visible, pc.discovered)
+            self.draw_tilemap(em.tilemap)
 
         drawable_entities = list(em.query_all_with_components(*GraphicsSystem.SPRITE_QUERY_COMPONENTS)) # get all drawable entities
         sorting_function = functools.partial(self._entity_sort, em)

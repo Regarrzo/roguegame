@@ -6,6 +6,7 @@ from enum import Enum, auto
 
 import random
 import os
+import time
 import itertools
 
 from . import util
@@ -81,7 +82,8 @@ class Tilemap:
         '''
         return util.Graph.from_2dgrid(self._data, weights, deltas_cost)
     
-    def generate_random_connected_rooms(self, iters=1000, min_room_size=2, max_room_size=5, wall_weight=10):
+    def generate_random_connected_rooms(self, iters=1000, min_room_size=2, max_room_size=5, wall_weight=10, verbose=True):
+        print("Generating rooms...")
         map_height, map_width = self.dims
         r = [[Tile.WALL] * map_width for _ in range(map_height)]
         rooms = []
@@ -101,14 +103,24 @@ class Tilemap:
         for a, b in rooms:
             util.grid2d_fill_rect(r, a, b, Tile.EMPTY)
 
-        for room, next_room in zip(rooms, rooms[1:]):
+        print("Generating corridors...")
+        pathfinding_durations = []
+        for i, (room, next_room) in enumerate(zip(rooms, rooms[1:])):
+            if i % 10 == 0: print(f"{i}/{len(rooms)} rooms processed")
             pathfind_origin = util.get_rect_center(*room)
             pathfind_dest = util.get_rect_center(*next_room)
             graph = util.Graph.from_2dgrid(r, weights={Tile.EMPTY: 1, Tile.WALL: wall_weight}, deltas_cost=util.CARDINAL_DELTAS_COST)
-            _, prev = graph.pathfind(pathfind_origin, pathfind_dest)
+
+            t = time.time()
+
+            _, prev = graph.pathfind(pathfind_origin, pathfind_dest, heuristic=util.manhatten_distance)
+
+            pathfinding_durations.append(time.time() - t)
+
             path = graph.trace_path(prev, pathfind_dest)
             util.grid2d_trace_path(r, path, Tile.EMPTY)
 
+        print(sum(pathfinding_durations) / len(pathfinding_durations))
         self._data = r
 
     def get_random_empty_tile(self):

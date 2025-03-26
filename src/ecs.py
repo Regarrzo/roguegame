@@ -23,8 +23,6 @@ class Entity:
     def get_component(self, em: Ecs, component: Type) -> Any:
         return em.get_components(self)[component]
 
-
-
 class Event(ABC):
     '''
     Events are how systems are called.

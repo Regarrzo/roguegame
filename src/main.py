@@ -20,7 +20,7 @@ from . import gamestep
 def main():
     # ECS initialization
     pygame.init()
-    game = ecs.TilemapEcs(tiles.Tilemap((32, 32)))
+    game = ecs.TilemapEcs(tiles.Tilemap((64, 64)))
     clock = pygame.time.Clock()
     
     # Load resources
@@ -43,7 +43,7 @@ def main():
     
 
     # Initialise game
-    game.tilemap.generate_random_connected_rooms()
+    game.tilemap.generate_random_connected_rooms(iters=5000)
     
     game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.player())
 
