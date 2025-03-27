@@ -51,12 +51,11 @@ class BehaviourSystem(ecs.System):
         if entity_pos == pos:
             return
 
-        if not pathfind_data.plan or pathfind_data.plan[-1] != pos:
-            if pathfind_data.graph is None:
-                pathfind_data.graph = em.tilemap.get_graph(tiles.DEFAULT_TILE_WEIGHTS, BehaviourSystem.DELTAS_COST)
+        if pathfind_data.graph is None:
+            pathfind_data.graph = em.tilemap.get_graph(tiles.DEFAULT_TILE_WEIGHTS, BehaviourSystem.DELTAS_COST)
 
-            dist, prev = pathfind_data.graph.pathfind(entity_pos, pos)
-            pathfind_data.plan = pathfind_data.graph.trace_path(prev, pos)
+        _, prev = pathfind_data.graph.pathfind(entity_pos, pos, heuristic=util.chebyshev_distance)
+        pathfind_data.plan = pathfind_data.graph.trace_path(prev, pos)
 
         if len(pathfind_data.plan) < 2:
             return
@@ -91,7 +90,7 @@ class BehaviourSystem(ecs.System):
             hostile_pos = em.get_pos(hostile)
             hostile_behaviour: components.SimpleHostileBehaviourComponent = hostile.get_component(em, components.SimpleHostileBehaviourComponent)
             pathfind_data: components.PathfindTargetComponent = hostile.get_component(em, components.PathfindTargetComponent)
-        
+
             if util.distance(player_pos, hostile_pos) <= hostile_behaviour.sight_range and em.tilemap.in_los(hostile_pos, player_pos):
                 hostile_behaviour.last_seen_player_position = player_pos
 

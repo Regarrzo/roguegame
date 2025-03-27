@@ -2,8 +2,8 @@ import os
 import pygame
 from . import components
 
-SCALE = 16
-WINDOW_DIMS = 64 * SCALE, 64 * SCALE
+SCALE = 64
+WINDOW_DIMS = 16 * SCALE, 16 * SCALE
 TARGET_FPS = 60
 RESOURCES_PATH = "res"
 KEY_MAP = {

@@ -16,11 +16,12 @@ from . import entity_definitions
 from . import behaviour
 from . import player
 from . import gamestep
+from . import cleanup
 
 def main():
     # ECS initialization
     pygame.init()
-    game = ecs.TilemapEcs(tiles.Tilemap((64, 64)))
+    game = ecs.TilemapEcs(tiles.Tilemap((16, 16)))
     clock = pygame.time.Clock()
     
     # Load resources
@@ -33,6 +34,7 @@ def main():
     behaviour_system = behaviour.BehaviourSystem()
     player_system = player.PlayerSystem()
     gamestep_system = gamestep.GamestepSystem()
+    cleanup_system = cleanup.CleanupDeadSystem()
 
     game.register_system(graphics_system, events.RenderTickEvent)
     game.register_system(user_input_system, events.UserInputEvent, events.RenderTickEvent)
@@ -40,17 +42,17 @@ def main():
     game.register_system(behaviour_system, events.BehaviourTickEvent)
     game.register_system(player_system, events.UserHoversTileWithMouseEvent, events.UserClicksTileWithMouseEvent, events.UserInputEvent, events.RenderTickEvent, events.AfterPhysicsTickEvent)
     game.register_system(gamestep_system, events.GamestepEvent)
-    
+    game.register_system(cleanup_system, events.AfterPhysicsTickEvent)
 
     # Initialise game
     game.tilemap.generate_random_connected_rooms(iters=5000)
     
     game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.player())
 
-    for _ in range(1):
+    for _ in range(5):
         game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.rat())
 
-    for _ in range(1):
+    for _ in range(5):
         game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.goblin())
 
     game.emit_event(events.GamestepEvent())

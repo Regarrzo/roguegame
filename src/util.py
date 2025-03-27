@@ -1,5 +1,6 @@
 from __future__ import annotations
 import heapq
+import operator
 from dataclasses import dataclass, field, asdict
 from typing import *
 import itertools
@@ -274,9 +275,26 @@ def top(t: Tuple, op):
     '''
     return tuple((op(x) for x in t))
 
+def tops(t: Tuple, s: float, op):
+    '''
+    Performs an elementwise scalar operation
+    '''
+    return tuple((op(x, s) for x in t))
+
 def get_integers_between(a: int, b: int):
     '''
     Similar to range() but inclusive and does not care which one is bigger.
     '''
     direction = 1 if b >= a else -1
     return range(a, b + direction, direction)
+
+def linint(a: Tuple, b: tuple, x: float):
+    '''
+    x is in [0, 1], will interpolate between tuples a and b.
+    '''
+    a_b = top2(b, a, operator.sub)
+    
+    return top2(a, tops(a_b, x, operator.mul), operator.add)
+
+def are_adjacent(a: Tuple[int, int], b: Tuple[int, int]) -> bool:
+    return all(-1 <= x <= 1 for x in top2(a, b, operator.sub))

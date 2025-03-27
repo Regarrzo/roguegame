@@ -115,7 +115,7 @@ class Ecs:
     def remove_entity(self, entity: Entity):
         pos = self._entity_to_position[entity]
         self._position_to_entity[pos].remove(entity)
-        del self._entity_to_position[Entity]
+        del self._entity_to_position[entity]
         del self.entities[entity]
         
 

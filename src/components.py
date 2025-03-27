@@ -1,3 +1,4 @@
+import os
 from typing import *
 from enum import Enum, auto
 from dataclasses import dataclass, asdict
@@ -30,15 +31,9 @@ class PlayerControlComponent(ecs.Component):
         self.visible: Set[Tuple[int, int]] = set()
         self.discovered: Set[Tuple[int, int]] = set()
 
-
         self.do_autowalk: bool = False
         self.autowalk_plan: List[Tuple[int, int]] = None
         self.autowalk_timer: int = 0
-
-
-
-        
-    
 
 @dataclass
 class MovementActionComponent(ecs.Component):
@@ -66,7 +61,35 @@ class SimpleHostileBehaviourComponent(ecs.Component):
     last_seen_player_position: Tuple[int, int] = None
         
 
+class HealthComponent(ecs.Component):
+    def __init__(self, max_health, health=None):
+        self.max_health = max_health
+
+        if health is None:
+            self.health = max_health
+        else:
+            self.health = health
+
+@dataclass
+class MeleeAttackComponent(ecs.Component):
+    damage: int    
+
 @dataclass
 class CollisionComponent(ecs.Component):
     pass
 
+@dataclass
+class FleeVulnerabilityComponent(ecs.Component):
+    vulnerable_square: Tuple[int, int] = None
+
+@dataclass
+class RealtimeLifetimeComponent:
+    created: int
+    lifetime: int = 500 # in ms
+
+@dataclass
+class FloatingTextComponent:
+    text: str = "Not set."
+    color: Tuple[int, int, int, int] = (255, 255, 255, 255)
+    font: str = os.path.join("res", "fonts", "alagard.ttf")
+    destroy_on_tick: bool = True
