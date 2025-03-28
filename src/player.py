@@ -63,6 +63,12 @@ class PlayerSystem(ecs.System):
         try:
             player = em.query_single_with_component(components.PlayerControlComponent)
         except KeyError:
+            try:
+                bartext = em.query_single_with_component(components.BarTextComponent).get_component(em, components.BarTextComponent)
+                bartext.text = "Game over. Press Space to restart."
+            except KeyError:
+                pass
+
             return
         
         pos = em.get_pos(player)

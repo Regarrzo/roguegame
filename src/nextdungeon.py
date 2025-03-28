@@ -19,7 +19,7 @@ class NextDungeonSystem(ecs.System):
             level_number: components.BarTextComponent = em.query_single_with_component(components.BarTextComponent).get_component(em, components.BarTextComponent)
             level_label, number = level_number.text.split()
             next_text = f"{level_label} {int(number) + 1}"
-        except KeyError:
+        except (KeyError, ValueError):
             next_text = "Level 1"
             
 

@@ -23,6 +23,10 @@ class UserInputSystem(ecs.System):
                 if not action: return
 
                 targets = entity_manager.query_all_with_components(components.PlayerControlComponent)
+
+                if not list(targets) and pygame.K_SPACE in pressed_keys:
+                    entity_manager.emit_event(events.LoadNextDungeonEvent())
+                    return
             
                 for target in targets:
                     entity_manager.add_components(target, action)
