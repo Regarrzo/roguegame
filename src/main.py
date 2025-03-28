@@ -17,11 +17,12 @@ from . import behaviour
 from . import player
 from . import gamestep
 from . import cleanup
+from . import nextdungeon
 
 def main():
     # ECS initialization
     pygame.init()
-    game = ecs.TilemapEcs(tiles.Tilemap((16, 16)))
+    game = ecs.TilemapEcs(tiles.Tilemap(configuration.DUNGEON_DIMS))
     clock = pygame.time.Clock()
     
     # Load resources
@@ -35,6 +36,7 @@ def main():
     player_system = player.PlayerSystem()
     gamestep_system = gamestep.GamestepSystem()
     cleanup_system = cleanup.CleanupDeadSystem()
+    nextdungeon_system = nextdungeon.NextDungeonSystem()
 
     game.register_system(graphics_system, events.RenderTickEvent)
     game.register_system(user_input_system, events.UserInputEvent, events.RenderTickEvent)
@@ -43,19 +45,10 @@ def main():
     game.register_system(player_system, events.UserHoversTileWithMouseEvent, events.UserClicksTileWithMouseEvent, events.UserInputEvent, events.RenderTickEvent, events.AfterPhysicsTickEvent)
     game.register_system(gamestep_system, events.GamestepEvent)
     game.register_system(cleanup_system, events.AfterPhysicsTickEvent)
+    game.register_system(nextdungeon_system, events.LoadNextDungeonEvent)
 
     # Initialise game
-    game.tilemap.generate_random_connected_rooms(iters=5000)
-    
-    game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.player())
-
-    for _ in range(5):
-        game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.rat())
-
-    for _ in range(5):
-        game.create_entity(game.tilemap.get_random_empty_tile(), *entity_definitions.goblin())
-
-    game.emit_event(events.GamestepEvent())
+    game.emit_event(events.LoadNextDungeonEvent())
 
     while True:
         pressed_keys = []

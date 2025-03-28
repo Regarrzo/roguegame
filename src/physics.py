@@ -35,14 +35,48 @@ class PhysicsSystem(ecs.System):
                     
                     damage = entity.get_component(em, components.MeleeAttackComponent).damage
                     target.get_component(em, components.HealthComponent).health -= damage
-                    em.create_entity(new_pos, *entity_definitions.hitmarker(damage))
+                    
+                    hitmarker_pos = em.get_pos(target)
+                    em.create_entity(hitmarker_pos, *entity_definitions.hitmarker(damage))
 
             if self.pos_is_free(em, new_pos):
                 if entity.has_component(em, components.FleeVulnerabilityComponent):
                     entity.get_component(em, components.FleeVulnerabilityComponent).vulnerable_square = old_y, old_x
 
+                entities = em.get_entities_at(new_pos)
+
+                to_remove_pickups = []
+                to_add_markers = []
+
+                for possible_pickup in entities:
+                    if possible_pickup.has_component(em, components.PickupComponent):
+                        comp: components.PickupComponent = possible_pickup.get_component(em, components.PickupComponent)
+                        
+                        if comp.player_only and not entity.has_component(em, components.PlayerControlComponent):
+                            break
+
+                        if not entity.has_component(em, components.HealthComponent):
+                            break
+                        
+                        hc = entity.get_component(em, components.HealthComponent)
+                        hc.health = min(hc.max_health, hc.health + comp.heal_amount)
+                        
+                        to_add_markers.append((new_pos, *entity_definitions.healmarker(comp.heal_amount)))
+
+                        if comp.nextlevel_switch:
+                            em.emit_event(events.LoadNextDungeonEvent())
+                            return
+
+                        to_remove_pickups.append(possible_pickup)
+
+
                 em.move_entity(entity, new_pos)
 
-            
+                for pickup in to_remove_pickups:
+                    em.remove_entity(pickup)
+
+                for marker in to_add_markers:
+                    em.create_entity(*marker)
+
             em.remove_components(entity, components.MovementActionComponent)
 

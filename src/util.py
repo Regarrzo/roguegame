@@ -57,6 +57,14 @@ def grid2d_fill_rect(grid: List[List], a, b, tile):
         for x in range(x_start, x_end + 1):
             grid[y][x] = tile
 
+def iterate_rect(a, b):
+    y_start, y_end = a[0], b[0]
+    x_start, x_end = a[1], b[1]
+
+    for y in range(y_start, y_end + 1):
+        for x in range(x_start, x_end + 1):
+            yield y, x
+
 def grid2d_trace_path(grid: List[List], path: List[(int, int)], tile):
     for y, x in path:
         grid[y][x] = tile

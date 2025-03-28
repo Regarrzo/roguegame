@@ -2,8 +2,9 @@ import os
 import pygame
 from . import components
 
-SCALE = 64
-WINDOW_DIMS = 16 * SCALE, 16 * SCALE
+DUNGEON_DIMS = 32, 32
+SCALE = 32
+WINDOW_DIMS = DUNGEON_DIMS[1] * SCALE, DUNGEON_DIMS[0] * SCALE + 40
 TARGET_FPS = 60
 RESOURCES_PATH = "res"
 KEY_MAP = {

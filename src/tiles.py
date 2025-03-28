@@ -82,45 +82,48 @@ class Tilemap:
         '''
         return util.Graph.from_2dgrid(self._data, weights, deltas_cost)
     
-    def generate_random_connected_rooms(self, iters=1000, min_room_size=2, max_room_size=5, wall_weight=10, verbose=True):
+    def generate_random_connected_rooms(self, iters=1000, min_room_size=1, max_room_size=5, wall_weight=10000, verbose=True):
         print("Generating rooms...")
         map_height, map_width = self.dims
         r = [[Tile.WALL] * map_width for _ in range(map_height)]
         rooms = []
+        unoccupied = set(itertools.product(range(1, map_height - 1), range(1, map_width - 1)))
 
         for i in range(iters):
+
+            y_pos, x_pos = random.choice(list(unoccupied))
+
             height = random.randint(min_room_size, max_room_size)
             width = random.randint(min_room_size, max_room_size)
-            
-            y_pos = random.randint(1, map_height - 2 - height)
-            x_pos = random.randint(1, map_width - 2 - width)
 
+            if not self.pos_is_in_bounds((y_pos + height + 1, 0)) or not self.pos_is_in_bounds((0, x_pos + width + 1)):
+                continue
+            
             a0, b0 = (y_pos, x_pos), (y_pos + height, x_pos + width)
 
             if not any((util.rects_intersect(a0, b0, *util.grow_rect(a1, b1, 1)) for a1, b1 in rooms)):
                 rooms.append((a0, b0))
 
+                for y, x in util.iterate_rect(*util.grow_rect(a0, b0, 1)):
+                    if (y, x) in unoccupied:
+                        unoccupied.remove((y, x))
+
         for a, b in rooms:
             util.grid2d_fill_rect(r, a, b, Tile.EMPTY)
 
+        
+
         print("Generating corridors...")
-        pathfinding_durations = []
         for i, (room, next_room) in enumerate(zip(rooms, rooms[1:])):
             if i % 10 == 0: print(f"{i}/{len(rooms)} rooms processed")
             pathfind_origin = util.get_rect_center(*room)
             pathfind_dest = util.get_rect_center(*next_room)
             graph = util.Graph.from_2dgrid(r, weights={Tile.EMPTY: 1, Tile.WALL: wall_weight}, deltas_cost=util.CARDINAL_DELTAS_COST)
-
-            t = time.time()
-
             _, prev = graph.pathfind(pathfind_origin, pathfind_dest, heuristic=util.manhatten_distance)
-
-            pathfinding_durations.append(time.time() - t)
-
             path = graph.trace_path(prev, pathfind_dest)
             util.grid2d_trace_path(r, path, Tile.EMPTY)
 
-        print(sum(pathfinding_durations) / len(pathfinding_durations))
+        
         self._data = r
 
     def get_random_empty_tile(self):

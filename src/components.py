@@ -90,6 +90,18 @@ class RealtimeLifetimeComponent:
 @dataclass
 class FloatingTextComponent:
     text: str = "Not set."
-    color: Tuple[int, int, int, int] = (255, 255, 255, 255)
+    color: Tuple[int, int, int] = (255, 255, 255)
     font: str = os.path.join("res", "fonts", "alagard.ttf")
     destroy_on_tick: bool = True
+
+@dataclass
+class PickupComponent:
+    player_only: bool = True
+    heal_amount: int = 2
+    nextlevel_switch: bool =False
+
+@dataclass
+class BarTextComponent:
+    text: str = "Not set."
+    color: Tuple[int, int, int] = (255, 255, 255)
+    font: str = os.path.join("res", "fonts", "alagard.ttf")

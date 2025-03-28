@@ -100,6 +100,13 @@ class GraphicsSystem(ecs.System):
         screen_pos = self.tile_scale * x, self.tile_scale * y
         self.scr.blit(img, screen_pos)
 
+    def draw_bartext(self, em: ecs.TilemapEcs, bartext: components.BarTextComponent):
+        height, width = em.tilemap.dims
+        screen_pos = 0, self.tile_scale * (height)
+        font: pygame.font.Font = self.resources[bartext.font]
+    
+        img = font.render(bartext.text, False, bartext.color)
+        self.scr.blit(img, screen_pos)
 
     def process(self, em: ecs.Ecs, event: ecs.Event):
         # this cound theoretically draw multiple tilemaps but this might never be necessary (maybe for chunked maps?)
@@ -147,3 +154,10 @@ class GraphicsSystem(ecs.System):
 
         if player is not None and pc.autowalk_plan:
             self.draw_path_preview(em, pc.autowalk_plan)
+
+        try:
+            bartext = em.query_single_with_component(components.BarTextComponent).get_component(em, components.BarTextComponent)
+            self.draw_bartext(em, bartext)
+
+        except KeyError:
+            pass

@@ -39,3 +39,7 @@ class UserClicksTileWithMouseEvent(ecs.Event):
 @dataclass
 class GamestepEvent(ecs.Event):
     pass
+
+@dataclass
+class LoadNextDungeonEvent(ecs.Event):
+    pass
