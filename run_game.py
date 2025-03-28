@@ -1,7 +1,9 @@
+
+import sys
+
+MIN_VER = (3, 13)
+
+if sys.version_info[:2] < MIN_VER:
+    print("This game might or might not work with your version of Python. It was created with 3.13.")
+
 import src.main
-
-# uncommit if you want to use the menu
-# import src.menu
-
-# if __name__ == "__main__":
-#     src.menu.main_menu(src.main.run_game)  # Call main_menu() with run_game() as an argument
